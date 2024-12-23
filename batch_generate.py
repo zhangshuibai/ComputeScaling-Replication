@@ -1,5 +1,4 @@
 import os
-os.environ["HF_TOKEN"] = "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"
 import json
 import argparse
 from transformers import pipeline
