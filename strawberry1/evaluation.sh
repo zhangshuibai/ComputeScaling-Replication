@@ -21,11 +21,12 @@ declare -A CONFIGS=(
   # ["./manual_synthetic_cot_12_11"]="./full_precision_results/manual_synthetic_cot_12_11_reward_results ./full_precision_figures"
   # ["./transformed_processbench"]="./full_precision_results/transformed_processbench_reward_results ./full_precision_figures"
   ["./transformed_llama1b_math500"]="./full_precision_results/transformed_llama1b_math500_reward_results ./full_precision_figures"
+  # ["./transformed_prm800k_small_test_set"]="./full_precision_results/transformed_prm800k_small_test_set_reward_results ./full_precision_figures"
 )
 #strawberry/manual_synthetic_cot_12_11/manual_eval_synthetic_cots_12_11.json
 
 # Define models to test
-MODELS=("llemma" "mistral" "v1104" "v1105" "v1112" "v1_subset_1117" "v2_checkpoint_1118" "v2_1119" "v2_balanced_1120" "v2_1122_full_finetune" "v3_1123_lora" "v3_1124_checkpoint" "v3_1123_checkpoint1" "v3_1124_balanced" "1125_v3b_mistral_lora" "1125_v3c_mistral_lora" "v4_mistral_lora" "v3d_mistral_lora" "v4_llama_1203" "v3_llama_1205" "prm800k_mistral_full_1203_re" "llama_zeroshot_prm" "llama_zeroshot_prm_aws" "prm800k_llama_joint_checkpoint500" "prm800k_llama_joint_checkpoint1000" "prm800k_llama_joint_checkpoint2000" "reasoneval_7b" "math_psa" "qwen_7b_prm")
+# MODELS=("llemma" "mistral" "v1104" "v1105" "v1112" "v1_subset_1117" "v2_checkpoint_1118" "v2_1119" "v2_balanced_1120" "v2_1122_full_finetune" "v3_1123_lora" "v3_1124_checkpoint" "v3_1123_checkpoint1" "v3_1124_balanced" "1125_v3b_mistral_lora" "1125_v3c_mistral_lora" "v4_mistral_lora" "v3d_mistral_lora" "v4_llama_1203" "v3_llama_1205" "prm800k_mistral_full_1203_re" "llama_zeroshot_prm" "llama_zeroshot_prm_aws" "prm800k_llama_joint_checkpoint500" "prm800k_llama_joint_checkpoint1000" "prm800k_llama_joint_checkpoint2000" "reasoneval_7b" "math_psa" "qwen_7b_prm")
 # MODELS=("v1_subset_1117")
 # MODELS=("v2_checkpoint_1118")
 # MODELS=("v2_1119")
@@ -51,7 +52,7 @@ MODELS=("llemma" "mistral" "v1104" "v1105" "v1112" "v1_subset_1117" "v2_checkpoi
 # MODELS=("llama_zeroshot_prm_aws")
 # MODELS=("prm800k_llama_joint_checkpoint500" "prm800k_llama_joint_checkpoint1000")
 # MODELS=("prm800k_llama_joint_checkpoint1000")
-MODELS=("math_psa" "rlhflow_8b_prm" "deepseek_8b_prm" "reasoneval_7b" "llemma" "mistral" "prm800k_llama_joint_checkpoint4500" "qwen_7b_prm" "prm800k_llama_joint_checkpoint2000" "prm800k_llama_joint_checkpoint1000" "v4_llama_1203" "v3_llama_1205")
+# MODELS=("math_psa" "rlhflow_8b_prm" "deepseek_8b_prm" "reasoneval_7b" "llemma" "mistral" "prm800k_llama_joint_checkpoint4500" "qwen_7b_prm" "prm800k_llama_joint_checkpoint2000" "prm800k_llama_joint_checkpoint1000" "v4_llama_1203" "v3_llama_1205")
 # MODELS=("prm800k_llama_joint_checkpoint4500")
 # MODELS=("reasoneval_7b")
 # MODELS=("qwen_7b_prm")
@@ -59,7 +60,8 @@ MODELS=("math_psa" "rlhflow_8b_prm" "deepseek_8b_prm" "reasoneval_7b" "llemma" "
 # MODELS=("math_psa" "qwen_7b_prm")
 # MODELS=("rlhflow_8b_prm" "deepseek_8b_prm")
 # MODELS=("qwen_7b_prm" "prm800k_llama_joint_checkpoint4500" "llemma" "mistral")
-
+# MODELS=("prm800k_qwen_alt_lora" "prm800k_llama_joint_checkpoint4500")
+MODELS=("prm800k_qwen_alt_lora")
 # Loop over each dataset configuration
 for DATASET in "${!CONFIGS[@]}"; do
   # Split the configuration value into output directory and metric file directory
@@ -75,7 +77,7 @@ for DATASET in "${!CONFIGS[@]}"; do
       --test_prm "$MODEL" \
       --output_dir "$OUTPUT_DIR" \
       --metric_file_dir "$METRIC_FILE_DIR" \
-      --do_not_calculate_metric \
+      # --do_not_calculate_metric \
       # --sample_10 \
 
     
