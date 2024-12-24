@@ -320,6 +320,7 @@ def calculate_majority_voting_metrics_with_sampling(json_file_path):
                 # Perform majority voting on the sampled solutions
                 answer_counter = Counter(sampled_answers)
                 sampled_majority_answer, _ = answer_counter.most_common(1)[0]
+                
 
                 # Check correctness of the sampled majority answer
                 sampled_majority_correctness = None
@@ -451,6 +452,8 @@ def compare_results(file_basename, majority_voting_folder, best_of_n_folder, wei
 
 if __name__ == "__main__":
     file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_math_psa_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_math_psa_rewards.json"
+    file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_rlhflow_8b_prm_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_rlhflow_8b_prm_rewards.json"
+    file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_prm800k_qwen_alt_lora_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_prm800k_qwen_alt_lora_rewards.json"
     majority_voting_metrics = calculate_majority_voting_metrics_with_sampling(file_path)
     best_of_n_metrics = calculate_best_of_n_metrics(file_path)
     weighted_best_of_n_metrics = calculate_weighted_best_of_n_metrics(file_path)
