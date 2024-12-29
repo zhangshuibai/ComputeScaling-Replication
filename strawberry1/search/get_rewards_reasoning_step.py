@@ -385,7 +385,7 @@ def main():
 
     # Add argument for the directory paths and test_prm
     parser.add_argument('--example_file_path_dir', type=str, required=True, help="Directory for example files")
-    parser.add_argument('--test_prm', type=str, choices=['llemma', 'mistral', 'v1104', "v1105", "v1112", "gpt4o", "gpt4o_real", "v1_subset_1117", "v2_checkpoint_1118", "v2_1119", "v2_balanced_1120", "v2_1122_full_finetune", "v3_1123_lora", "v3_1124_checkpoint", "v3_1123_checkpoint1", "v3_1124_balanced", "1125_v3b_mistral_lora", "1125_v3c_mistral_lora", "v4_mistral_lora", "v3d_mistral_lora", "v4_llama_1203", "v3_llama_1205", "prm800k_mistral_full_1203_re", "llama_zeroshot_prm", "llama_zeroshot_prm_aws", "prm800k_llama_joint_checkpoint500", "prm800k_llama_joint_checkpoint1000", "prm800k_llama_joint_checkpoint2000", "prm800k_llama_joint_checkpoint4500", "reasoneval_7b", "math_psa", "qwen_7b_prm", "rlhflow_8b_prm", "deepseek_8b_prm", "prm800k_qwen_alt_lora"], required=True, help="PRM model to use")
+    parser.add_argument('--test_prm', type=str, choices=['llemma', 'mistral', 'v1104', "v1105", "v1112", "gpt4o", "gpt4o_real", "v1_subset_1117", "v2_checkpoint_1118", "v2_1119", "v2_balanced_1120", "v2_1122_full_finetune", "v3_1123_lora", "v3_1124_checkpoint", "v3_1123_checkpoint1", "v3_1124_balanced", "1125_v3b_mistral_lora", "1125_v3c_mistral_lora", "v4_mistral_lora", "v3d_mistral_lora", "v4_llama_1203", "v3_llama_1205", "prm800k_mistral_full_1203_re", "llama_zeroshot_prm", "llama_zeroshot_prm_aws", "prm800k_llama_joint_checkpoint500", "prm800k_llama_joint_checkpoint1000", "prm800k_llama_joint_checkpoint2000", "prm800k_llama_joint_checkpoint4500", "reasoneval_7b", "math_psa", "qwen_7b_prm", "rlhflow_8b_prm", "deepseek_8b_prm", "prm800k_qwen_alt_lora", "prm800k_llama_lora", "prm800k_llama_fulltune", "prm800k_qwen_fulltune"], required=True, help="PRM model to use")
     parser.add_argument('--output_dir', type=str, required=True, help="Directory to save the reward files")
     parser.add_argument("--metric_file_dir", type=str, required=True)
     parser.add_argument("--four_bit", action="store_true")
@@ -639,6 +639,21 @@ def main():
             prm = test_prm_dual(
                 aggregation="full", 
             )
+        elif test_prm == "prm800k_llama_lora":
+            from prm800k_llama_lora import test_prm_dual
+            prm = test_prm_dual(
+                aggregation="full", 
+            )
+        elif test_prm == "prm800k_llama_fulltune":
+            from prm800k_llama_fulltune import test_prm_dual
+            prm = test_prm_dual(
+                aggregation="full", 
+            )
+        elif test_prm == "prm800k_qwen_fulltune":
+            from prm800k_qwen_fulltune import test_prm_dual
+            prm = test_prm_dual(
+                aggregation="full", 
+            )
         else:
             raise NotImplementedError
         
@@ -791,7 +806,7 @@ def main():
                     steps_all = f"{question}\n\n" + "\n\n".join(steps)
                     rewards = prm([steps_all])
                     cot["prm_reward"] = rewards[0].score
-                elif test_prm in ["prm800k_qwen_alt_lora"]:
+                elif test_prm in ["prm800k_qwen_alt_lora", "prm800k_llama_lora", "prm800k_llama_fulltune", "prm800k_qwen_fulltune"]:
                     # steps = cot["steps"]
                     steps = [step.strip().replace(" \n\n\n\n", "") for step in steps]
                     question = each_data["question"].strip().replace(" \n\n\n\n", "")

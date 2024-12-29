@@ -16,7 +16,7 @@ declare -A CONFIGS=(
   # ["./transformed_experiment_synthetic_v1_data_validation"]="./full_precision_results/transformed_experiment_synthetic_v1_data_validation_reward_results ./full_precision_figures"
   # ["./evaluate_prm800k/transformed_prm800k"]="./full_precision_results/transformed_prm800k_reward_results ./full_precision_figures"
   # ["./transformed_llamag70b_generated_sample100_prm800k"]="./full_precision_results/transformed_llamag70b_generated_sample100_prm800k_reward_results ./full_precision_figures"
-  # ["./prm800k_best_of_n_sample100_openai"]="./full_precision_results/prm800k_best_of_n_sample100_openai_reward_results ./full_precision_figures"
+  ["./prm800k_best_of_n_sample100_openai"]="./full_precision_results/prm800k_best_of_n_sample100_openai_reward_results ./full_precision_figures"
   # ["./transformed_llamag70b_generated_sample1_prm800k"]="./full_precision_results/transformed_llamag70b_generated_sample1_prm800k_reward_results ./full_precision_figures"
   # ["./manual_synthetic_cot_12_11"]="./full_precision_results/manual_synthetic_cot_12_11_reward_results ./full_precision_figures"
   # ["./transformed_processbench"]="./full_precision_results/transformed_processbench_reward_results ./full_precision_figures"
@@ -61,7 +61,10 @@ declare -A CONFIGS=(
 # MODELS=("rlhflow_8b_prm" "deepseek_8b_prm")
 # MODELS=("qwen_7b_prm" "prm800k_llama_joint_checkpoint4500" "llemma" "mistral")
 # MODELS=("prm800k_qwen_alt_lora" "prm800k_llama_joint_checkpoint4500")
-MODELS=("prm800k_qwen_alt_lora")
+# MODELS=("prm800k_qwen_alt_lora" "prm800k_llama_joint_checkpoint4500")
+# MODELS=("prm800k_llama_lora")
+MODELS=("prm800k_llama_fulltune")
+MODELS=("prm800k_qwen_fulltune")
 # Loop over each dataset configuration
 for DATASET in "${!CONFIGS[@]}"; do
   # Split the configuration value into output directory and metric file directory
@@ -77,7 +80,7 @@ for DATASET in "${!CONFIGS[@]}"; do
       --test_prm "$MODEL" \
       --output_dir "$OUTPUT_DIR" \
       --metric_file_dir "$METRIC_FILE_DIR" \
-      # --do_not_calculate_metric \
+      --do_not_calculate_metric \
       # --sample_10 \
 
     
