@@ -274,7 +274,7 @@ def numeric_equal(prediction: float, reference: float, rel_tol=1e-4, abs_tol=1e-
     # else:
     # prediction = round(prediction, len(str(reference).split(".")[-1]))
     close = isclose(reference, prediction, 
-                #    rel_tol=rel_tol,
+                   rel_tol=rel_tol,
                     abs_tol=abs_tol)
     return close
 
