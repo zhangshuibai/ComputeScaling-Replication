@@ -124,6 +124,7 @@ if __name__ == "__main__":
     #     print(answer)
     #     input()
     file_path = "/home/ec2-user/chemqa_formular/chemqa_train.json"
+    file_path = "/home/ec2-user/chemqa_formular/formular_train.json"
     data = read_json_file(file_path=file_path)
 
     for each_dict in data:
@@ -132,7 +133,7 @@ if __name__ == "__main__":
         except:
             continue
         extracted_answer = extract_answer(last_cot)
-        parsed_answer_correctness = math_equal(prediction=extracted_answer.split(" ")[0], reference=each_dict["answer"].split(" ")[0], abs_tol=1, )
+        parsed_answer_correctness = math_equal(prediction=extracted_answer.split(" ")[0], reference=each_dict["answer"].split(" ")[0], rel_tol=1e-5, abs_tol=1e-2)
         print("extracted: "+ extracted_answer)
         print("GT: " + each_dict["answer"])
         print("correctness: " + str(parsed_answer_correctness))
