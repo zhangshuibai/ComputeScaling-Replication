@@ -73,7 +73,7 @@ def str_to_pmatrix(input_str):
 def math_equal(
     prediction: Union[bool, float, str],
     reference: Union[float, str],
-    include_percentage: bool = True,
+    include_percentage: bool = False,
     is_close: bool = True,
     timeout: bool = False,
     rel_tol=1e-4, 
