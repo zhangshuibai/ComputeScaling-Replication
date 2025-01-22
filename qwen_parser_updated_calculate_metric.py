@@ -4,7 +4,7 @@ import random
 from collections import Counter
 import numpy as np
 import matplotlib.pyplot as plt
-
+from collections import defaultdict
 import json
 import os
 import random
@@ -16,6 +16,35 @@ import os
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+
+from latex2sympy2 import latex2sympy
+from sympy import latex, simplify
+
+def get_canonical_form(expression: str) -> str:
+    parsed_expr = latex2sympy(expression)
+    simplified_expr = simplify(parsed_expr)
+    return latex(simplified_expr)
+
+def find_majority_answer(answers: list[str]) -> str:
+        canonical_groups = defaultdict(int)
+        canonical_to_original = {}
+
+        for answer in answers:
+            canonical_form = get_canonical_form(answer)
+
+            # Increment count for the canonical form
+            canonical_groups[canonical_form] += 1
+
+            # Track the original answer for this canonical form
+            if canonical_form not in canonical_to_original:
+                canonical_to_original[canonical_form] = answer
+
+        # Find the canonical form with the largest count
+        max_count = max(canonical_groups.values())
+        for canonical_form, count in canonical_groups.items():
+            if count == max_count:
+                # Return the first occurring group in case of a tie
+                return canonical_to_original[canonical_form]
 
 
 def calculate_weighted_best_of_n_metrics(json_file_path):
@@ -281,9 +310,9 @@ def calculate_majority_voting_metrics_with_sampling(json_file_path):
         dict: A dictionary containing sampled accuracies (mean, max, min) and overall metrics.
     """
     # Load the JSON file
-    with open(json_file_path, 'r', encoding='utf-8') as file:
-        data = json.load(file)
-
+    # with open(json_file_path, 'r', encoding='utf-8') as file:
+    #     data = json.load(file)
+    data = update_current_file(json_file_path)
     # Prepare the output directory
     script_path = os.path.abspath(__file__)
     script_dir = os.path.dirname(script_path)
@@ -310,26 +339,31 @@ def calculate_majority_voting_metrics_with_sampling(json_file_path):
             for question in data:
                 # Get all parsed answers and their correctness
                 parsed_answers = [cot['parsed_answer'] for cot in question['chain_of_thoughts']]
-                correctness_list = [cot['parsed_answer_correctness'] for cot in question['chain_of_thoughts']]
+                # correctness_list = [cot['parsed_answer_correctness'] for cot in question['chain_of_thoughts']]
+
 
                 # Sample `n` solutions randomly
                 sampled_indices = random.sample(range(len(parsed_answers)), n)
                 sampled_answers = [parsed_answers[i] for i in sampled_indices]
-                sampled_correctness = [correctness_list[i] for i in sampled_indices]
+                # sampled_correctness = [correctness_list[i] for i in sampled_indices]
 
                 # Perform majority voting on the sampled solutions
-                answer_counter = Counter(sampled_answers)
-                sampled_majority_answer, _ = answer_counter.most_common(1)[0]
+                # answer_counter = Counter(sampled_answers)
+                # sampled_majority_answer, _ = answer_counter.most_common(1)[0]
                 
 
-                # Check correctness of the sampled majority answer
-                sampled_majority_correctness = None
-                for i in sampled_indices:
-                    if parsed_answers[i] == sampled_majority_answer:
-                        sampled_majority_correctness = correctness_list[i]
-                        break
+                # # Check correctness of the sampled majority answer
+                # sampled_majority_correctness = None
+                # for i in sampled_indices:
+                #     if parsed_answers[i] == sampled_majority_answer:
+                #         sampled_majority_correctness = correctness_list[i]
+                #         break
 
                 # Update correct count based on majority correctness
+
+                sampled_majority_answer = find_majority_answer(sampled_answers)
+                sampled_majority_correctness = math_equal(prediction=sampled_majority_answer, reference=question["qwen_math_parser_GT_answer"], timeout=True)
+
                 if sampled_majority_correctness:
                     correct_count += 1
 
@@ -450,6 +484,40 @@ def compare_results(file_basename, majority_voting_folder, best_of_n_folder, wei
 
     print(f"Comparison plots saved to {output_dir}")
 
+from qwen_math_parser import read_json_file,extract_answer_map, load_math_500_dataset, math_equal
+from tqdm import tqdm
+def update_current_file(file_path):
+
+    math_500_data = load_math_500_dataset()
+
+    original_data = read_json_file(file_path)
+
+    updated_data = []
+
+    for each_q in tqdm(original_data):
+        index = each_q["split_index"].split("_")[1]
+        ###
+        each_q["qwen_math_parser_GT_answer"] = extract_answer_map(math_500_data[int(index)]["solution"], "math")
+        ###
+        for each_cot_dict in each_q["chain_of_thoughts"]:
+            # each_cot_dict["qwen_math_parser_parsed_answer"] = extract_answer_map(each_cot_dict["original_response"], "math")
+            # each_cot_dict["qwen_math_parser_parsed_answer_correctness"] = math_equal(prediction=each_cot_dict["qwen_math_parser_parsed_answer"], 
+            #                                                                          reference=each_q["qwen_math_parser_GT_answer"])
+            
+            each_cot_dict["original_parsed_answer"] = each_cot_dict["parsed_answer"]
+            each_cot_dict["original_parsed_answer_correctness"] = each_cot_dict["parsed_answer_correctness"]
+            
+            each_cot_dict["parsed_answer"] = extract_answer_map(each_cot_dict["original_response"], "math")
+            # each_cot_dict["parsed_answer_correctness"] = math_equal(prediction=each_cot_dict["parsed_answer"], 
+            #                                                         reference=each_q["qwen_math_parser_GT_answer"],
+            #                                                         timeout=True)
+            del each_cot_dict["parsed_answer_correctness"]
+
+        updated_data.append(each_q)
+    
+    return updated_data
+            
+
 if __name__ == "__main__":
     # file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_math_psa_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_math_psa_rewards.json"
     # file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_rlhflow_8b_prm_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_rlhflow_8b_prm_rewards.json"
@@ -460,14 +528,16 @@ if __name__ == "__main__":
     # file_path = "/home/ec2-user/strawberry/full_precision_results/prm800k_best_of_n_sample100_openai_reward_results/prm800k_best_of_n_sample100_openai_with_prm800k_llama_lora_reward/prm800_best_of_n_100_with_prm800k_llama_lora_rewards.json"
     # file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_prm800k_llama_fulltune_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_prm800k_llama_fulltune_rewards.json"
     # file_path = "/mnt/data2/straberry_data2/full_precision_results_updated_qwen_math_parser/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_prm800k_llama_lora_reward/qwen_math_parser_updated_parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_prm800k_llama_lora_rewards.json"
-    file_path = "/mnt/data2/straberry_data2/full_precision_results_updated_qwen_math_parser/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_deepseek_8b_prm_reward/qwen_math_parser_updated_parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_deepseek_8b_prm_rewards.json"
+    
+    # file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_deepseek_8b_prm_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_deepseek_8b_prm_rewards.json"
+    file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_mmlu_noaugs_llama_lora_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_mmlu_noaugs_llama_lora_rewards.json"
     
     majority_voting_metrics = calculate_majority_voting_metrics_with_sampling(file_path)
-    best_of_n_metrics = calculate_best_of_n_metrics(file_path)
-    weighted_best_of_n_metrics = calculate_weighted_best_of_n_metrics(file_path)
+    # best_of_n_metrics = calculate_best_of_n_metrics(file_path)
+    # weighted_best_of_n_metrics = calculate_weighted_best_of_n_metrics(file_path)
 
-    compare_results(file_basename = os.path.basename(file_path).split(".js")[0],
-                    majority_voting_folder="majority_voting_metrics",
-                    best_of_n_folder="best_of_n_metrics",
-                    weighted_best_of_n_folder="weighted_best_of_n_metrics"
-                    )
+    # compare_results(file_basename = os.path.basename(file_path).split(".js")[0],
+    #                 majority_voting_folder="majority_voting_metrics",
+    #                 best_of_n_folder="best_of_n_metrics",
+    #                 weighted_best_of_n_folder="weighted_best_of_n_metrics"
+    #                 )

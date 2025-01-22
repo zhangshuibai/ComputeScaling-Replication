@@ -500,10 +500,12 @@ if __name__ == "__main__":
     # file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_prm800k_llama_fulltune_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_prm800k_llama_fulltune_rewards.json"
     # file_path = "/mnt/data2/straberry_data2/full_precision_results_updated_qwen_math_parser/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_prm800k_llama_lora_reward/qwen_math_parser_updated_parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_prm800k_llama_lora_rewards.json"
     root_dir = "/mnt/data2/llama1b_math500_raw_results/transformed_llama1b_math500_reward_results"
+    # file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_mmlu_noaugs_llama_lora_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_mmlu_noaugs_llama_lora_rewards.json"
     for model in os.listdir(root_dir):
         
         file_name = os.listdir(os.path.join(root_dir, model))[0]
-        file_path = os.path.join(root_dir, model, file_name)
+        file_path = os.path.join(root_dir, model, file_name
+                                 )
 
         if os.path.exists(os.path.join("/mnt/data2/llama1b_math500_raw_results/comparison", file_name.split(".js")[0], "comparison_last.png")):
             continue

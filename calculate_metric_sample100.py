@@ -40,8 +40,10 @@ def calculate_weighted_best_of_n_metrics(json_file_path):
     os.makedirs(output_dir, exist_ok=True)
 
     # Initialize variables for Weighted Best-of-N
-    max_samples = 256  # Maximum CoT solutions per problem
-    sample_powers = [2 ** i for i in range(9)]  # 2^0 to 2^8
+    max_samples = 100  # Maximum CoT solutions per problem
+    # sample_powers = [2 ** i for i in range(9)]  # 2^0 to 2^8
+    sample_powers = [1, 2, 4, 8, 16, 32, 64, 100]
+    
     aggregation_methods = ['last', 'mean', 'min']
     metrics = {method: {} for method in aggregation_methods}  # Store metrics for each method
 
@@ -103,7 +105,7 @@ def calculate_weighted_best_of_n_metrics(json_file_path):
                     # Check correctness of the selected answer
                     for cot in question['chain_of_thoughts']:
                         if cot['parsed_answer'] == best_weighted_answer:
-                            if cot['parsed_answer_correctness']:
+                            if cot['answer_parsed_correctness']:
                                 correct_count += 1
                             break
 
@@ -174,8 +176,9 @@ def calculate_best_of_n_metrics(json_file_path):
     os.makedirs(output_dir, exist_ok=True)
 
     # Initialize variables for Best-of-N
-    max_samples = 256  # Maximum CoT solutions per problem
-    sample_powers = [2 ** i for i in range(9)]  # 2^0 to 2^8
+    max_samples = 100  # Maximum CoT solutions per problem
+    # sample_powers = [2 ** i for i in range(9)]  # 2^0 to 2^8
+    sample_powers = [1, 2, 4, 8, 16, 32, 64, 100]
     aggregation_methods = ['last', 'mean', 'min']
     metrics = {method: {} for method in aggregation_methods}  # Store metrics for each method
 
@@ -219,7 +222,7 @@ def calculate_best_of_n_metrics(json_file_path):
                     # Check correctness of the selected answer
                     for cot in question['chain_of_thoughts']:
                         if cot['parsed_answer'] == best_answer:
-                            if cot['parsed_answer_correctness']:
+                            if cot['answer_parsed_correctness']:
                                 correct_count += 1
                             break
 
@@ -292,8 +295,9 @@ def calculate_majority_voting_metrics_with_sampling(json_file_path):
     os.makedirs(output_dir, exist_ok=True)
 
     # Initialize variables for sampling metrics
-    max_samples = 256  # Maximum CoT solutions per problem
-    sample_powers = [2 ** i for i in range(9)]  # 2^0 to 2^8
+    max_samples = 100  # Maximum CoT solutions per problem
+    # sample_powers = [2 ** i for i in range(9)]  # 2^0 to 2^8
+    sample_powers = [1, 2, 4, 8, 16, 32, 64, 100]
     sampling_results = {n: [] for n in sample_powers}
 
     # Outer loop for each sampling size (2^0, 2^1, ..., 2^8)
@@ -310,10 +314,14 @@ def calculate_majority_voting_metrics_with_sampling(json_file_path):
             for question in data:
                 # Get all parsed answers and their correctness
                 parsed_answers = [cot['parsed_answer'] for cot in question['chain_of_thoughts']]
-                correctness_list = [cot['parsed_answer_correctness'] for cot in question['chain_of_thoughts']]
+                correctness_list = [cot['answer_parsed_correctness'] for cot in question['chain_of_thoughts']]
 
                 # Sample `n` solutions randomly
                 sampled_indices = random.sample(range(len(parsed_answers)), n)
+                # print(sampled_indices)
+                # print(len(parsed_answers))
+                # print(n)
+                # input()
                 sampled_answers = [parsed_answers[i] for i in sampled_indices]
                 sampled_correctness = [correctness_list[i] for i in sampled_indices]
 
@@ -397,7 +405,7 @@ def compare_results(file_basename, majority_voting_folder, best_of_n_folder, wei
     # Define the output directory
     script_path = os.path.abspath(__file__)
     script_dir = os.path.dirname(script_path)
-    output_dir = os.path.join(script_dir, "comparison", file_basename)
+    output_dir = os.path.join(script_dir, "comparison_sample100", file_basename)
     os.makedirs(output_dir, exist_ok=True)
 
     # Define RM reward aggregation methods
@@ -456,12 +464,9 @@ if __name__ == "__main__":
     # file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_prm800k_qwen_alt_lora_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_prm800k_qwen_alt_lora_rewards.json"
     # file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_prm800k_qwen_alt_lora_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_prm800k_qwen_alt_lora_rewards.json"
     # file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_prm800k_llama_joint_checkpoint4500_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_prm800k_llama_joint_checkpoint4500_rewards.json"
-    # file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_prm800k_llama_lora_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_prm800k_llama_lora_rewards.json"
-    # file_path = "/home/ec2-user/strawberry/full_precision_results/prm800k_best_of_n_sample100_openai_reward_results/prm800k_best_of_n_sample100_openai_with_prm800k_llama_lora_reward/prm800_best_of_n_100_with_prm800k_llama_lora_rewards.json"
-    # file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_prm800k_llama_fulltune_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_prm800k_llama_fulltune_rewards.json"
-    # file_path = "/mnt/data2/straberry_data2/full_precision_results_updated_qwen_math_parser/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_prm800k_llama_lora_reward/qwen_math_parser_updated_parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_prm800k_llama_lora_rewards.json"
-    file_path = "/mnt/data2/straberry_data2/full_precision_results_updated_qwen_math_parser/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_deepseek_8b_prm_reward/qwen_math_parser_updated_parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_deepseek_8b_prm_rewards.json"
-    
+    file_path = "/home/ec2-user/strawberry/full_precision_results/transformed_llama1b_math500_reward_results/transformed_llama1b_math500_with_prm800k_llama_lora_reward/parsed_answer_meta-llama_Llama-3.2-1B-Instruct_HuggingFaceH4_MATH-500_temp0.8_samples256_max_new_tokens_2048_with_prm800k_llama_lora_rewards.json"
+    file_path = "/home/ec2-user/strawberry/full_precision_results/prm800k_best_of_n_sample100_openai_reward_results/prm800k_best_of_n_sample100_openai_with_prm800k_llama_lora_reward/prm800_best_of_n_100_with_prm800k_llama_lora_rewards.json"
+    file_path = "/home/ec2-user/strawberry/full_precision_results/prm800k_best_of_n_sample100_openai_reward_results/prm800k_best_of_n_sample100_openai_with_prm800k_llama_fulltune_reward/prm800_best_of_n_100_with_prm800k_llama_fulltune_rewards.json"
     majority_voting_metrics = calculate_majority_voting_metrics_with_sampling(file_path)
     best_of_n_metrics = calculate_best_of_n_metrics(file_path)
     weighted_best_of_n_metrics = calculate_weighted_best_of_n_metrics(file_path)
